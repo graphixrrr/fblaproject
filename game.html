@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cosmic Odyssey</title>
+    <style>
+        /* Main body styling with space-themed gradient background */
+        body {
+            background: linear-gradient(to bottom, #0b0d17 0%, #1a1b2e 100%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Main container for the game interface */
+        .game-container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 128, 255, 0.2);
+        }
+
+        /* Game title styling */
+        h1 {
+            text-align: center;
+            color: #4a9eff;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+            margin-bottom: 30px;
+        }
+
+        /* ASCII art styling for scene visuals */
+        .ascii-art {
+            font-family: monospace;
+            white-space: pre;
+            text-align: center;
+            color: #4a9eff;
+            margin-bottom: 20px;
+            font-size: 0.8em;
+            line-height: 1.2;
+        }
+
+        /* Scene description text styling */
+        .description {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        /* Container for the choice buttons */
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Button styling with blue gradient */
+        button {
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        /* Button hover effect - slightly enlarge */
+        button:hover {
+            transform: scale(1.02);
+        }
+
+        /* Styling for end-of-game congratulations message */
+        .congratulations {
+            color: #4a9eff;
+            font-size: 1.5em;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Star styling for background animation */
+        .star {
+            position: fixed;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            z-index: -1;
+        }
+
+        /* Star twinkling animation */
+        @keyframes starTwinkle {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main game container -->
+    <div class="game-container">
+        <!-- Game title -->
+        <h1>COSMIC ODYSSEY</h1>
+
+        <!-- Container for ASCII art that represents the current scene -->
+        <div class="ascii-art" id="scene-art"></div>
+
+        <!-- Container for the scene description text -->
+        <div class="description" id="scene-description"></div>
+
+        <!-- Container for the player choice buttons -->
+        <div class="choices" id="choices-container"></div>
+
+        <!-- Container for congratulations message at game end -->
+        <div class="congratulations" id="congrats-message"></div>
+
+        <!-- How the game control buttons are created through html (save, load, help, stop) -->
+        <div class="game-controls">
+            <button onclick="saveGame()">Save Game</button>
+            <button onclick="loadGame()">Load Game</button>
+            <button onclick="toggleHelp()" style="background: linear-gradient(45deg, #21F3C6, #21F39F);">Help</button>
+            <button onclick="toggleQA()" style="background: linear-gradient(45deg, #9921F3, #C921F3);">Q&A</button>
+            <button onclick="stopGame()" style="background: linear-gradient(45deg, #F32121, #F37521);">Stop Game</button>
+        </div>
+
+        <!-- Q&A System Interface with preset question boxes (hidden by default) -->
+        <div id="qa-interface" style="display: none; background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid #9921F3;">
+            <h3>Ask a Question</h3>
+            <p>Click on a question to get an answer:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <div onclick="askPresetQuestion('What is the moon made of?')" class="question-box" style="background: rgba(153, 33, 243, 0.4); padding: 10px; border-radius: 5px; cursor: pointer; text-align: center;">What is the moon made of?</div>
+                <div onclick="askPresetQuestion('How do astronauts survive on the moon?')" class="question-box" style="background: rgba(153, 33, 243, 0.4); padding: 10px; border-radius: 5px; cursor: pointer; text-align: center;">How do astronauts survive on the moon?</div>
+                <div onclick="askPresetQuestion('How do I save my game progress?')" class="question-box" style="background: rgba(153, 33, 243, 0.4); padding: 10px; border-radius: 5px; cursor: pointer; text-align: center;">How do I save my game progress?</div>
+                <div onclick="askPresetQuestion('What is the goal of this game?')" class="question-box" style="background: rgba(153, 33, 243, 0.4); padding: 10px; border-radius: 5px; cursor: pointer; text-align: center;">What is the goal of this game?</div>
+                <div onclick="askPresetQuestion('Tell me about lunar exploration history')" class="question-box" style="background: rgba(153, 33, 243, 0.4); padding: 10px; border-radius: 5px; cursor: pointer; text-align: center;">Tell me about lunar exploration history</div>
+            </div>
+            <div id="qa-response" style="background: rgba(153, 33, 243, 0.2); padding: 10px; border-radius: 5px; min-height: 50px;">
+                Click on a question box above to get an answer!
+            </div>
+            <button onclick="toggleQA()" style="margin-top: 10px;">Close Q&A</button>
+        </div>
+
+        <!-- Help menu (hidden by default) -->
+        <div id="help-menu" style="display: none; background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid #4a9eff;">
+            <h3>How to Play Cosmic Odyssey</h3>
+            <ul>
+                <li>Read the story text in the middle</li>
+                <li>Click any button to choose what to do next</li>
+                <li>Save your game if you want to take a break</li>
+                <li>Load your game to continue where you left off</li>
+            </ul>
+            <p>You're an astronaut exploring the moon! Make choices to discover amazing things.</p>
+            <button onclick="toggleHelp()">Close Help</button>
+        </div>
+
+        <!-- Space Knowledge Base removed as requested -->
+
+        <!-- Journey Analysis section -->
+        <div id="journey-analysis-section">
+            <h3>Journey Analysis</h3>
+            <button onclick="showJourneyAnalysis()">Analyze My Journey</button>
+            <div id="journey-analysis-results"></div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Start a new game by sending a POST request to the server
+         * Receives and displays the initial game scene
+         */
+        function startGame() {
+            fetch('/start_game', {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(updateGame);
+        }
+
+        /**
+         * Process a player's choice by sending the choice index to the server
+         * @param {number} choiceIndex - The index of the chosen option
+         */
+        function makeChoice(choiceIndex) {
+            fetch('/make_choice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ choice: choiceIndex }),
+            })
+            .then(response => response.json())
+            .then(updateGame);
+        }
+
+        /**
+         * Save the current game state
+         * Sends a save request to the server and displays confirmation
+         */
+        function saveGame() {
+            fetch('/make_choice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ save: true }),
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        }
+
+        /**
+         * Load a previously saved game
+         * Sends a load request to the server and updates the display
+         */
+        function loadGame() {
+            fetch('/make_choice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ load: true }),
+            })
+            .then(response => response.json())
+            .then(updateGame);
+        }
+
+        /**
+         * Toggle the visibility of the help menu
+         */
+        function toggleHelp() {
+            const helpMenu = document.getElementById('help-menu');
+            if (helpMenu.style.display === 'none') {
+                helpMenu.style.display = 'block';
+            } else {
+                helpMenu.style.display = 'none';
+            }
+        }
+
+        /**
+         * Stop the current game after confirmation
+         * Sends a request to end the game and shows game over screen
+         */
+        function stopGame() {
+            if (confirm("Are you sure you want to end the game?")) {
+                fetch('/stop_game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(updateGame);
+            }
+        }
+
+        /**
+         * Update the game display with new scene data
+         * @param {Object} data - Scene data from the server
+         */
+        function updateGame(data) {
+            // Update the scene description
+            document.getElementById('scene-description').textContent = data.description;
+
+            // Clear and rebuild the choices container
+            const choicesContainer = document.getElementById('choices-container');
+            choicesContainer.innerHTML = '';
+
+            // Add choice buttons if available
+            if (data.choices) {
+                data.choices.forEach((choice, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.onclick = () => makeChoice(index);
+                    choicesContainer.appendChild(button);
+                });
+            }
+
+            // Show congratulations message if it's the end of the game
+            if (data.is_end) {
+                document.getElementById('congrats-message').textContent = 
+                    data.congratulations || "Game Over";
+            } else {
+                document.getElementById('congrats-message').textContent = '';
+            }
+
+            // Update ASCII art if available
+            if (data.ascii_art) {
+                document.getElementById('scene-art').textContent = data.ascii_art;
+            }
+        }
+
+        /**
+         * Toggle the visibility of the Q&A interface
+         */
+        function toggleQA() {
+            const qaInterface = document.getElementById('qa-interface');
+            if (qaInterface.style.display === 'none') {
+                qaInterface.style.display = 'block';
+            } else {
+                qaInterface.style.display = 'none';
+            }
+        }
+
+        /**
+         * Send a preset question to the server and display the response
+         * @param {string} question - The preset question text
+         */
+        function askPresetQuestion(question) {
+            // Highlight the clicked question box
+            document.querySelectorAll('.question-box').forEach(box => {
+                if (box.textContent === question) {
+                    box.style.background = 'rgba(153, 33, 243, 0.8)';
+                } else {
+                    box.style.background = 'rgba(153, 33, 243, 0.4)';
+                }
+            });
+
+            // Show loading indicator
+            document.getElementById('qa-response').textContent = 'Finding an answer...';
+
+            fetch('/ask_question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question: question }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('qa-response').textContent = data.response;
+            })
+            .catch(error => {
+                document.getElementById('qa-response').textContent = 'Sorry, there was an error processing your question.';
+                console.error('Error:', error);
+            });
+        }
+
+        // Function to ask a question to the QA system
+        function askQuestion() {
+            const question = document.getElementById('question-input').value;
+            if (!question) return;
+
+            fetch('/ask_question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('qa-response').textContent = data.response;
+            })
+            .catch(error => {
+                document.getElementById('qa-response').textContent = 'Sorry, there was an error processing your question.';
+                console.error('Error:', error);
+            });
+        }
+
+        // Function to show journey analysis
+        function showJourneyAnalysis() {
+            fetch('/journey_analysis')
+            .then(response => response.json())
+            .then(data => {
+                const analysisDiv = document.getElementById('journey-analysis-results');
+                const analysis = data.analysis;
+
+                if (typeof analysis === 'string') {
+                    analysisDiv.textContent = analysis;
+                    return;
+                }
+
+                let analysisHTML = `
+                    <p>Scenes visited: ${analysis.scenes_visited}</p>
+                    <p>Journey length: ${analysis.journey_length}</p>
+                `;
+
+                analysisDiv.innerHTML = analysisHTML;
+            })
+            .catch(error => {
+                document.getElementById('journey-analysis-results').textContent = 'Could not retrieve journey analysis.';
+                console.error('Error:', error);
+            });
+        }
+
+        // Add stars to background to enhance the space theme
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.animation = `starTwinkle ${Math.random() * 3 + 2}s infinite`;
+            document.body.appendChild(star);
+        }
+
+        // Start the game when the page loads
+        window.onload = startGame;
+    </script>
+</body>
+</html>
